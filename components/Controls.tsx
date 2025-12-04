@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ParticleShape } from '../types';
 
 interface ControlsProps {
@@ -38,6 +38,16 @@ const Controls: React.FC<ControlsProps> = ({
   isCameraEnabled,
   setIsCameraEnabled
 }) => {
+  const [isOpen, setIsOpen] = useState(true);
+  useEffect(() => {
+    const apply = () => {
+      const mobile = window.innerWidth < 768;
+      setIsOpen(mobile ? false : true);
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    return () => window.removeEventListener('resize', apply);
+  }, []);
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
@@ -49,8 +59,17 @@ const Controls: React.FC<ControlsProps> = ({
   };
 
   return (
-    <div className="absolute top-0 right-0 h-full p-6 flex flex-col justify-center pointer-events-none z-40">
-      <div className="bg-black/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-2xl w-72 pointer-events-auto transition-all hover:bg-black/50">
+    <>
+      <div className="absolute top-4 right-4 z-50 md:hidden pointer-events-auto">
+        <button
+          onClick={() => setIsOpen(v => !v)}
+          className="w-10 h-10 rounded-full bg-black/40 border border-white/10 text-white shadow-lg backdrop-blur-md"
+        >
+          {isOpen ? '×' : '☰'}
+        </button>
+      </div>
+      <div className="absolute top-0 right-0 h-full p-6 flex flex-col justify-center pointer-events-none z-40">
+        <div className={`bg-black/30 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-2xl w-72 pointer-events-auto transition-all hover:bg-black/50 ${isOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 md:translate-x-0 md:opacity-100'}`}>
         
         {/* Header */}
         <div className="mb-6 border-b border-white/10 pb-4">
@@ -161,8 +180,9 @@ const Controls: React.FC<ControlsProps> = ({
                 </li>
             </ul>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
